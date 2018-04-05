@@ -51,12 +51,20 @@ impl Stack {
 pub unsafe extern "C" fn _start_rust(sp: &'static Stack) -> ! {
     extern "C" {
         fn main(argc: isize, argv: *const *const u8) -> c_int;
+        fn _init();
+        fn _fini();
     }
+
+    _init();
 
     let argc = sp.argc();
     let argv = sp.argv();
 
-    platform::exit(main(argc, argv));
+    let code = main(argc, argv);
+
+    _fini();
+
+    platform::exit(code);
 }
 
 #[lang = "panic_fmt"]
